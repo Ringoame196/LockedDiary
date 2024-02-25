@@ -33,21 +33,33 @@ dependencies {
 }
 
 configure<BukkitPluginDescription> {
-    main = "@group@.Main"
+    main = "com.github.Ringoame196.Main"
     version = gitVersion()
     apiVersion = "1." + pluginVersion.split(".")[1]
+    commands {
+        register("lock") {
+            description = "記入済みの本にロックをかける"
+            usage = "/lock [<open>,<set>] <パスワード> <exit>"
+        }
+    }
 }
 
 tasks.withType<ShadowJar> {
     configurations = listOf(shadowImplementation)
     archiveClassifier.set("")
-    relocate("kotlin", "@group@.libs.kotlin")
-    relocate("org.intellij.lang.annotations", "@group@.libs.org.intellij.lang.annotations")
-    relocate("org.jetbrains.annotations", "@group@.libs.org.jetbrains.annotations")
+    relocate("kotlin", "com.github.Ringoame196.libs.kotlin")
+    relocate("org.intellij.lang.annotations", "com.github.Ringoame196.libs.org.intellij.lang.annotations")
+    relocate("org.jetbrains.annotations", "com.github.Ringoame196.libs.org.jetbrains.annotations")
 }
 
 tasks.named("build") {
     dependsOn("shadowJar")
+    doFirst {
+        copy {
+            from(buildDir.resolve("libs/${project.name}.jar"))
+            into("D:/デスクトップ/Twitterサーバー/plugins")
+        }
+    }
 }
 
 task<LaunchMinecraftServerTask>("buildAndLaunchServer") {
