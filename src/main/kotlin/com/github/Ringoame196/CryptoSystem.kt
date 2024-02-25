@@ -1,6 +1,8 @@
 package com.github.Ringoame196
 
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.Plugin
+import java.io.File
 import java.security.Key
 import java.security.SecureRandom
 import java.util.Base64
@@ -8,10 +10,14 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 class CryptoSystem(private val plugin: Plugin) {
-    private val encryptionKey = plugin.config.getString("encryptionKey")
+    private fun acquisitionEncryptionKey(): String? {
+        val configFile = File(plugin.dataFolder, "config.yml")
+        val config = YamlConfiguration.loadConfiguration(configFile)
+        return config.getString("encryptionKey")
+    }
     fun settingCipherKey() {
         val config = plugin.config
-        if (encryptionKey != "") {
+        if (acquisitionEncryptionKey() != "") {
             return
         }
         val newEncryptionKey = generateRandomKey()
@@ -27,7 +33,7 @@ class CryptoSystem(private val plugin: Plugin) {
     }
     fun encryption(value: String): String {
         val cipher: Cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val key: Key = SecretKeySpec(encryptionKey?.toByteArray(), "AES")
+        val key: Key = SecretKeySpec(acquisitionEncryptionKey()?.toByteArray(), "AES")
         cipher.init(Cipher.ENCRYPT_MODE, key)
         val encryptedBytes: ByteArray = cipher.doFinal(value.toByteArray())
         return Base64.getEncoder().encodeToString(encryptedBytes)
@@ -38,7 +44,7 @@ class CryptoSystem(private val plugin: Plugin) {
     }
     fun restore(value: String): String {
         val cipher: Cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val key: Key = SecretKeySpec(encryptionKey?.toByteArray(), "AES")
+        val key: Key = SecretKeySpec(acquisitionEncryptionKey()?.toByteArray(), "AES")
         cipher.init(Cipher.DECRYPT_MODE, key)
         val decryptedBytes: ByteArray = cipher.doFinal(Base64.getDecoder().decode(value))
         return String(decryptedBytes)
